@@ -15,6 +15,7 @@ import 'package:healthcare/register.dart';
 import 'package:healthcare/viewDoctors.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized(); 
   runApp(const MyApp());
 }
 

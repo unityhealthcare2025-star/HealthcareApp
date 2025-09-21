@@ -1,166 +1,140 @@
 import 'package:flutter/material.dart';
 
-
 class BookSlot extends StatefulWidget {
+  final String doctorName;
+  final String hospitalName;
+
+  const BookSlot({
+    super.key,
+    required this.doctorName,
+    required this.hospitalName,
+  });
+
   @override
   _BookSlotState createState() => _BookSlotState();
 }
 
 class _BookSlotState extends State<BookSlot> {
-  // Sample data
-  Map<String, List<String>> hospitalDoctorMap = {
-    'City Hospital': ['Dr. Smith', 'Dr. Adams'],
-    'Green Clinic': ['Dr. Jane', 'Dr. Brian'],
+  // Mocked availability — replace with API call if needed
+  final Map<String, List<String>> doctorAvailability = {
+    'Ajay': ['2025-09-24', '2025-09-25'],
+    'Dr. Adams': ['2025-09-26', '2025-09-27'],
+    'Dr. Jane': ['2025-09-28', '2025-09-29'],
+    'Dr. Brian': ['2025-09-30', '2025-10-01'],
   };
 
-  Map<String, List<String>> doctorAvailability = {
-    'Dr. Smith': ['2025-09-04', '2025-09-06'],
-    'Dr. Adams': ['2025-09-05', '2025-09-07'],
-    'Dr. Jane': ['2025-09-03', '2025-09-04'],
-    'Dr. Brian': ['2025-09-06', '2025-09-08'],
-  };
+  final List<String> timeSlots = ['10:00 AM', '11:00 AM', '02:00 PM', '04:00 PM'];
 
-  List<String> timeSlots = ['10:00 AM', '11:00 AM', '02:00 PM', '04:00 PM'];
-
-  String? selectedHospital;
-  String? selectedDoctor;
   String? selectedDate;
   String? selectedTime;
-
-  List<String> doctors = [];
   List<String> availableDates = [];
 
-  bool showSlots = false;
+  @override
+  void initState() {
+    super.initState();
+
+    // Preload available dates for this doctor
+    availableDates = doctorAvailability[widget.doctorName] ?? [];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Book a Doctor Slot",style: TextStyle(color: Colors.white)),
-       centerTitle: true,
+      appBar: AppBar(
+        title: const Text("Book Appointment", style: TextStyle(color: Colors.white)),
+        centerTitle: true,
         backgroundColor: const Color.fromARGB(255, 195, 96, 241),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// Hospital Dropdown
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(labelText: "Select Hospital", border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
-              value: selectedHospital,
-              items: hospitalDoctorMap.keys
-                  .map((hospital) => DropdownMenuItem(
-                        value: hospital,
-                        child: Text(hospital),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedHospital = value;
-                  doctors = hospitalDoctorMap[value]!;
-                  selectedDoctor = null;
-                  showSlots = false;
-                });
-              },
-            ),
+            /// Display doctor and hospital info
+            Text("Hospital: ${widget.hospitalName}", style: TextStyle(fontSize: 16)),
+            SizedBox(height: 6),
+            Text("Doctor: ${widget.doctorName}", style: TextStyle(fontSize: 16)),
+            Divider(height: 32),
 
-            SizedBox(height: 16),
+            /// Select Date
+            Text("Select Date:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            SizedBox(height: 8),
+            if (availableDates.isEmpty)
+              Text("No available dates for this doctor.", style: TextStyle(color: Colors.red)),
+            if (availableDates.isNotEmpty)
+              Wrap(
+                spacing: 8.0,
+                children: availableDates.map((date) {
+                  return ChoiceChip(
+                    label: Text(date),
+                    selected: selectedDate == date,
+                    onSelected: (_) {
+                      setState(() {
+                        selectedDate = date;
+                        selectedTime = null;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
 
-            /// Doctor Dropdown
-            DropdownButtonFormField<String>(
-              decoration: InputDecoration(labelText: "Select Doctor",border: OutlineInputBorder(borderRadius: BorderRadius.circular(12))),
-              value: selectedDoctor,
-              items: doctors
-                  .map((doctor) => DropdownMenuItem(
-                        value: doctor,
-                        child: Text(doctor),
-                      ))
-                  .toList(),
-              onChanged: (value) {
-                setState(() {
-                  selectedDoctor = value;
-                  selectedDate = null;
-                  selectedTime = null;
-                });
-              },
-            ),
+            SizedBox(height: 24),
 
-            SizedBox(height: 16),
+            /// Select Time
+            if (selectedDate != null) ...[
+              Text("Select Time:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              SizedBox(height: 8),
+              Wrap(
+                spacing: 8.0,
+                children: timeSlots.map((time) {
+                  return ChoiceChip(
+                    label: Text(time),
+                    selected: selectedTime == time,
+                    onSelected: (_) {
+                      setState(() {
+                        selectedTime = time;
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
 
-            ElevatedButton(
-              onPressed: () {
-                if (selectedDoctor != null) {
-                  setState(() {
-                    availableDates = doctorAvailability[selectedDoctor!]!;
-                    showSlots = true;
-                  });
-                }
-              },
-              child: Text("Show"),
-            ),
+            SizedBox(height: 32),
 
-            SizedBox(height: 20),
-
-            /// Show Date and Time Slots
-            if (showSlots && availableDates.isNotEmpty)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text("Select Date:"),
-                  Wrap(
-                    spacing: 8.0,
-                    children: availableDates.map((date) {
-                      return ChoiceChip(
-                        label: Text(date),
-                        selected: selectedDate == date,
-                        onSelected: (_) {
-                          setState(() {
-                            selectedDate = date;
-                            selectedTime = null;
-                          });
-                        },
-                      );
-                    }).toList(),
+            /// Book Slot Button
+            if (selectedDate != null && selectedTime != null)
+              Center(
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Color.fromARGB(255, 188, 103, 222),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                    textStyle: TextStyle(fontSize: 16),
                   ),
-                  SizedBox(height: 20),
-                  if (selectedDate != null) ...[
-                    Text("Select Time:"),
-                    Wrap(
-                      spacing: 8.0,
-                      children: timeSlots.map((time) {
-                        return ChoiceChip(
-                          label: Text(time),
-                          selected: selectedTime == time,
-                          onSelected: (_) {
-                            setState(() {
-                              selectedTime = time;
-                            });
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ],
-                  SizedBox(height: 20),
-                  if (selectedDate != null && selectedTime != null)
-                    ElevatedButton(
-                      onPressed: () {
-                        showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: Text("Confirm Booking"),
-                            content: Text(
-                                "You have booked an appointment with $selectedDoctor at $selectedTime on $selectedDate."),
-                            actions: [
-                              TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text("OK"))
-                            ],
-                          ),
-                        );
-                      },
-                      child: Text("Book Slot"),
-                    )
-                ],
-              )
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        title: Text("Confirm Booking"),
+                        content: Text(
+                          "You have booked an appointment with ${widget.doctorName} "
+                          "at $selectedTime on $selectedDate.",
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context); // close dialog
+                              Navigator.pop(context); // return to previous page
+                            },
+                            child: Text("OK"),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                  child: Text("Book Slot"),
+                ),
+              ),
           ],
         ),
       ),

@@ -79,34 +79,34 @@ class Homepage extends StatelessWidget {
                      // Navigate to Hospitals
                      Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ViewHospitals()),
+                    MaterialPageRoute(builder: (context) => NearbyHospitalsPage()),
                   );
                     },
                   ),
-                   _buildGridCard(
-                    context,
-                    icon: Icons.medical_services,
-                    title: 'View Doctors',
-                    onTap: () {
-                      // Navigate to Feedback
-                      Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ViewDoctors()),
-                  );
-                    },
-                  ),
-                  _buildGridCard(
-                    context,
-                    icon: Icons.note, 
-                    title: 'Booking Details',
-                     onTap: () {
-                      // Navigate to Feedback
-                      Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => BookSlot()),
-                  );
-                    },
-                    ),
+                  //  _buildGridCard(
+                  //   context,
+                  //   icon: Icons.medical_services,
+                  //   title: 'View Doctors',
+                  //   onTap: () {
+                  //     // Navigate to Feedback
+                  //     Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => ViewDoctors()),
+                  // );
+                  //   },
+                  // ),
+                  // _buildGridCard(
+                  //   context,
+                  //   icon: Icons.note, 
+                  //   title: 'Booking Details',
+                  //    onTap: () {
+                  //     // Navigate to Feedback
+                  //     Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => BookSlot()),
+                  // );
+                  //   },
+                  //   ),
                   _buildGridCard(
                     context,
                     icon: Icons.event_note, 

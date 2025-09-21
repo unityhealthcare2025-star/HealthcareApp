@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:healthcare/api/loginApi.dart';
 import 'package:healthcare/bottomNva.dart';
 import 'package:healthcare/homePage.dart';
 import 'package:healthcare/register.dart';
@@ -70,10 +71,9 @@ class LoginPage extends StatelessWidget {
                   onPressed: () { 
                     
                     if (formkey.currentState!.validate()) {
-                      Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Bottomnav()),
-                    );
+
+                      loginApi(userController.text, PasswordController.text, context);
+                      
                     }
                     },
                   child: Text('Login',style: TextStyle(fontSize: 18),),
