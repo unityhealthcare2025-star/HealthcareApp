@@ -57,7 +57,7 @@ class DoctorListPage extends StatelessWidget {
           MaterialPageRoute(
             builder: (_) => BookSlot(
               doctorName: doc['name'],
-              hospitalName: hospitalName,
+              hospitalName: hospitalName, doctorId: doc['id'],
             ),
           ),
         );

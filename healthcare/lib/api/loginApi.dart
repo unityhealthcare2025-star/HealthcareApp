@@ -5,7 +5,7 @@ import 'package:healthcare/bottomNva.dart';
 
 Dio dio=Dio();
 int? loginid ;
-final baseurl= 'http://192.168.1.101:5000';
+final baseurl= 'http://192.168.1.36:5000';
 Future<void> loginApi(username,password,context)async{
   try {
     Response response= await dio.post('$baseurl/userlogin', data: { 'Username':username,'Password': password});

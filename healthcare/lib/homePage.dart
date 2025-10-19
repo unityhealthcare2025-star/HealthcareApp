@@ -91,7 +91,7 @@ class Homepage extends StatelessWidget {
                   //     // Navigate to Feedback
                   //     Navigator.push(
                   //   context,
-                  //   MaterialPageRoute(builder: (context) => ViewDoctors()),
+                  //   MaterialPageRoute(builder: (context) => DoctorListPage(hospitalId: 1, hospitalName: '',)),
                   // );
                   //   },
                   // ),
