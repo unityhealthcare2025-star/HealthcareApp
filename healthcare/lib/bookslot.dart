@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
 import 'package:healthcare/api/loginApi.dart';
 
 class BookSlot extends StatefulWidget {
   final String doctorName;
   final String hospitalName;
-  final int doctorId; // Assuming you pass doctor ID to query API
+  final int doctorId;
 
   const BookSlot({
     super.key,
@@ -22,11 +23,12 @@ class _BookSlotState extends State<BookSlot> {
   final Dio _dio = Dio();
 
   bool _isLoading = true;
-  List<String> availableDates = [];
-  Map<String, List<String>> availableTimeSlots = {}; // Map<Date, List<Time>>
 
-  String? selectedDate;
+  List<Map<String, dynamic>> rawSlots = []; // Raw response data
+
+  DateTime? selectedDate;
   String? selectedTime;
+  int? selectedSlotId;
 
   @override
   void initState() {
@@ -40,37 +42,114 @@ class _BookSlotState extends State<BookSlot> {
         _isLoading = true;
       });
 
-      // Example API URL — replace with your actual endpoint
-      final response = await _dio.get(
-        '$baseurl/availability/${widget.doctorId}',
-      );print(response.data);
+      final response = await _dio.get('$baseurl/availability/${widget.doctorId}');
+      print("SLOTS: ${response.data}");
 
       if (response.statusCode == 200) {
-        // Expecting response data format like:
-        // {
-        //   "dates": ["2025-10-24", "2025-10-25"],
-        //   "slots": {
-        //     "2025-10-24": ["10:00 AM", "11:00 AM"],
-        //     "2025-10-25": ["02:00 PM", "04:00 PM"]
-        //   }
-        // }
-        final data = response.data;
+        rawSlots = List<Map<String, dynamic>>.from(response.data);
+
         setState(() {
-          availableDates = List<String>.from(data['dates']);
-          availableTimeSlots = Map<String, List<String>>.from(
-            data['slots'].map((key, value) => MapEntry(key, List<String>.from(value))),
-          );
           _isLoading = false;
         });
-      } else {
-        throw Exception('Failed to load availability');
       }
     } catch (e) {
+      print("Error fetching slots: $e");
       setState(() {
         _isLoading = false;
       });
-      // You can handle errors here (show SnackBar, dialog etc.)
-      print('Error fetching slots: $e');
+    }
+  }
+
+  /// Filter slots based on selected date’s weekday
+  List<Map<String, dynamic>> getSlotsForSelectedDate() {
+    if (selectedDate == null) return [];
+
+    int weekday = selectedDate!.weekday; // 1=Mon ... 7=Sun
+
+    return rawSlots.where((slot) {
+      int slotDay;
+
+      if (slot["Day_of_week"] is int) {
+        slotDay = slot["Day_of_week"];
+      } else {
+        const dayMap = {
+          "monday": 1,
+          "tuesday": 2,
+          "wednesday": 3,
+          "thursday": 4,
+          "friday": 5,
+          "saturday": 6,
+          "sunday": 7,
+        };
+        slotDay = dayMap[slot["Day_of_week"].toString().toLowerCase()] ?? 1;
+      }
+
+      return slotDay == weekday;
+    }).map((slot) {
+      return {
+        "time": "${slot['Start_Time']} - ${slot['End_Time']}",
+        "id": slot["id"],
+      };
+    }).toList();
+  }
+
+  /// BOOK APPOINTMENT API
+  Future<void> bookslot() async {
+    if (selectedSlotId == null || selectedDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please select date and time")),
+      );
+      return;
+    }
+
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      final response = await _dio.post(
+        '$baseurl/bookdoctor/$loginid',
+        data: {
+          "SCHEDULEID": selectedSlotId,
+          "Booking_date": DateFormat('yyyy-MM-dd').format(selectedDate!),
+        },
+      );
+
+      if (response.statusCode == 200) {
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => AlertDialog(
+            title: Text("Booking Confirmed!"),
+            content: Text(
+              "You booked an appointment with ${widget.doctorName} on "
+              "${DateFormat('EEEE, MMM dd, yyyy').format(selectedDate!)} "
+              "at $selectedTime.",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: Text("Done"),
+              ),
+            ],
+          ),
+        );
+      }
+    } catch (e) {
+      print("BOOKING ERROR: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Failed to book slot"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -78,14 +157,14 @@ class _BookSlotState extends State<BookSlot> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Book Appointment", style: TextStyle(color: Colors.white)),
+        title: Text("Book Appointment", style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 195, 96, 241),
+        backgroundColor: Colors.deepPurple,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
+            ? Center(child: CircularProgressIndicator())
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -94,46 +173,66 @@ class _BookSlotState extends State<BookSlot> {
                   Text("Doctor: ${widget.doctorName}", style: TextStyle(fontSize: 16)),
                   Divider(height: 32),
 
+                  /// DATE PICKER BUTTON
                   Text("Select Date:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                  SizedBox(height: 8),
+                  SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () async {
+                      DateTime? pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(Duration(days: 60)),
+                      );
 
-                  if (availableDates.isEmpty)
-                    Text("No available dates for this doctor.", style: TextStyle(color: Colors.red)),
-                  if (availableDates.isNotEmpty)
-                    Wrap(
-                      spacing: 8.0,
-                      children: availableDates.map((date) {
-                        return ChoiceChip(
-                          label: Text(date),
-                          selected: selectedDate == date,
-                          onSelected: (_) {
-                            setState(() {
-                              selectedDate = date;
-                              selectedTime = null;
-                            });
-                          },
-                        );
-                      }).toList(),
+                      if (pickedDate != null) {
+                        setState(() {
+                          selectedDate = pickedDate;
+                          selectedTime = null;
+                          selectedSlotId = null;
+                        });
+                      }
+                    },
+                    child: Text(
+                      selectedDate == null
+                          ? "Choose a Date"
+                          : DateFormat('yyyy-MM-dd').format(selectedDate!),
                     ),
+                  ),
 
                   SizedBox(height: 24),
 
+                  /// SHOW TIME SLOTS ONLY WHEN DATE IS SELECTED
                   if (selectedDate != null) ...[
-                    Text("Select Time:", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    SizedBox(height: 8),
-                    Wrap(
-                      spacing: 8.0,
-                      children: (availableTimeSlots[selectedDate] ?? []).map((time) {
-                        return ChoiceChip(
-                          label: Text(time),
-                          selected: selectedTime == time,
-                          onSelected: (_) {
-                            setState(() {
-                              selectedTime = time;
-                            });
-                          },
+                    Text("Select Time:",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    SizedBox(height: 10),
+
+                    Builder(
+                      builder: (_) {
+                        final slots = getSlotsForSelectedDate();
+
+                        if (slots.isEmpty) {
+                          return Text("No slots available for this day.",
+                              style: TextStyle(color: Colors.red));
+                        }
+
+                        return Wrap(
+                          spacing: 8.0,
+                          children: slots.map((slot) {
+                            return ChoiceChip(
+                              label: Text(slot["time"]),
+                              selected: selectedTime == slot["time"],
+                              onSelected: (_) {
+                                setState(() {
+                                  selectedTime = slot["time"];
+                                  selectedSlotId = slot["id"];
+                                });
+                              },
+                            );
+                          }).toList(),
                         );
-                      }).toList(),
+                      },
                     ),
                   ],
 
@@ -143,33 +242,11 @@ class _BookSlotState extends State<BookSlot> {
                     Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 188, 103, 222),
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          textStyle: TextStyle(fontSize: 16),
+                          backgroundColor: Colors.deepPurple,
+                          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                         ),
-                        onPressed: () {
-                          // TODO: call booking API here
-                          showDialog(
-                            context: context,
-                            builder: (_) => AlertDialog(
-                              title: Text("Confirm Booking"),
-                              content: Text(
-                                "You have booked an appointment with ${widget.doctorName} "
-                                "at $selectedTime on $selectedDate.",
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.pop(context); // close dialog
-                                    Navigator.pop(context); // return to previous page
-                                  },
-                                  child: Text("OK"),
-                                )
-                              ],
-                            ),
-                          );
-                        },
-                        child: Text("Book Slot"),
+                        onPressed: bookslot,
+                        child: Text("Book Slot", style: TextStyle(color: Colors.white)),
                       ),
                     ),
                 ],
