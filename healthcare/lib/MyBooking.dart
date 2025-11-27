@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:healthcare/DoctorfeedbackRating.dart';
 import 'package:healthcare/api/loginApi.dart';
 import 'package:healthcare/viewprescription.dart';
 
@@ -14,6 +15,8 @@ class Mybooking extends StatefulWidget {
 
 class _MybookingState extends State<Mybooking> {
   bool _isLoading = true;
+
+  
   List<Map<String,dynamic>> bookings = [];
   Future<void> fetchbookings() async {
     try {
@@ -96,20 +99,40 @@ class _MybookingState extends State<Mybooking> {
                     Text('Time: ${bookings[index]['Start_Time']} - ${bookings[index]['End_Time']}', style: TextStyle(fontWeight: FontWeight.bold,  fontSize: 14),),
          
               SizedBox(height: 5,),
-                   GestureDetector(onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => PrescriptionPage(bookingId: bookings[index]['id'],),));
-                   },
-                     child: Container(
-                            // height: 60,
-                            // width: 100,
-                            decoration: BoxDecoration(color: const Color.fromARGB(255, 0, 8, 1),
-                            borderRadius: BorderRadius.circular(6)
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text('View prescription', style: TextStyle(color: Colors.white),),
-                            ),
-                          ),
+                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                     children: [
+                       GestureDetector(onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => PrescriptionPage(bookingId: bookings[index]['id'],),));
+                       },
+                         child: Container(
+                                // height: 60,
+                                // width: 100,
+                                decoration: BoxDecoration(color: const Color.fromARGB(255, 8, 5, 0),
+                                borderRadius: BorderRadius.circular(6)
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text('View prescription', style: TextStyle(color: Colors.white),),
+                                ),
+                              ),
+                       ),
+                       GestureDetector(onTap: (){
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => DoctorFeedbackRating(doctorid: bookings[index]['doctor_id'],),));
+                       },
+                         child: Container(
+                                // height: 60,
+                                // width: 100,
+                                decoration: BoxDecoration(color: const Color.fromARGB(255, 218, 181, 62),
+                                borderRadius: BorderRadius.circular(6)
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text('Add review', style: TextStyle(color: Colors.white),),
+                                ),
+                              ),
+                       ),
+                     ],
                    )
                   ],
                 ),

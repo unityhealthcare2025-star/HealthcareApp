@@ -1,15 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:healthcare/ChangePassword.dart';
 import 'package:healthcare/EditProfile.dart';
+import 'package:healthcare/api/viewProfileapi.dart';
 import 'package:healthcare/login.dart';
 
-class ProfileScreen extends StatelessWidget {
-  // User data (can come from a model or backend)
-  final String name = 'Coding with T';
-  final String email = 'support@codingwitht.com';
-  final String phone = '+92 317 8059528';
+class ProfileScreen extends StatefulWidget {
 
-  const ProfileScreen({super.key});
+   ProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ProfileScreen> createState() => ProfileScreenState();
+}
+
+class ProfileScreenState extends State<ProfileScreen> {
+
+
+
+  Map<String,dynamic> ViewProfile = {};
+   bool _isLoading = true;
+   Future<void> fetchProfile() async {
+  setState(() {
+    _isLoading = true;
+  });
+
+  final data = await fetchprofile(); // call API
+  setState(() {
+    ViewProfile = data; // update state
+    _isLoading = false;
+  });
+}
+
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    fetchProfile();
+    super.initState();
+  }
+  // User data (can come from a model or backend)
+  // final String name = ViewProfile['UserName'];
+
+  // final String email = 'support@codingwitht.com';
+
+  // final String phone = '+92 317 8059528';
 
   @override
   Widget build(BuildContext context) {
@@ -39,16 +72,16 @@ class ProfileScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          name,
+                          ViewProfile['UserName'] ?? 'ghgf',
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text(email, style: const TextStyle(color: Colors.grey)),
+                        Text(ViewProfile['E_mail'] ?? 'ghgf', style: const TextStyle(color: Colors.grey)),
                         const SizedBox(height: 2),
-                        Text(phone, style: const TextStyle(color: Colors.grey)),
+                        Text(ViewProfile['Phone'].toString(), style: const TextStyle(color: Colors.grey)),
                       ],
                     ),
                   ),
@@ -69,7 +102,7 @@ class ProfileScreen extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => EditProfilePage()),
+                    MaterialPageRoute(builder: (context) => EditProfilePage(profileData:ViewProfile)),
                   );
                   // TODO: Navigate to View Profile Screen
                   ScaffoldMessenger.of(context).showSnackBar(

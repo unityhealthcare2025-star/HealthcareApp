@@ -62,7 +62,9 @@ class _PrescriptionPageState extends State<PrescriptionPage> {
         backgroundColor:  const Color.fromARGB(255, 188, 103, 222),
         
       ),
-      body: Padding(
+      body: 
+      _prescription==null?Center(child: Text('No prescription found'))
+      : Padding(
         padding: const EdgeInsets.all(16.0),
         child: Center(
           child: Container(

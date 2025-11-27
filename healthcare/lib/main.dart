@@ -5,7 +5,7 @@ import 'package:healthcare/MyBooking.dart';
 import 'package:healthcare/SendComplaint.dart';
 import 'package:healthcare/EditProfile.dart';
 import 'package:healthcare/ViewHospitals.dart';
-import 'package:healthcare/ViewProfile.dart';
+
 import 'package:healthcare/bookslot.dart';
 import 'package:healthcare/bottomNva.dart';
 import 'package:healthcare/MyProfile.dart';

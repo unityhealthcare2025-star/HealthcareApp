@@ -1,119 +1,10 @@
-// import 'package:flutter/material.dart';
-// import 'package:healthcare/login.dart';
-
-// class UpdateProfile extends StatelessWidget {
-//   const UpdateProfile({super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Edit Your Profile',style: TextStyle(color: Colors.white)
-//         ),
-//         centerTitle: true,
-//         backgroundColor: const Color.fromARGB(255, 195, 96, 241),
-//         ),
-//         body: Padding(padding: const EdgeInsets.all(12.0),
-//         child: Center(
-//           child: SingleChildScrollView(
-//             child: Column(
-//               mainAxisAlignment: MainAxisAlignment.center,
-//               children: [
-//                 TextFormField(
-//                   decoration: InputDecoration(
-//                     labelText: 'Name',
-//                     border: OutlineInputBorder()
-//                   ),
-//                 ),
-//                 SizedBox(height: 15),
-//                  TextFormField(
-//                   decoration: InputDecoration(
-//                     labelText: 'Gender',
-//                     border: OutlineInputBorder()
-//                   ),
-//                 ),
-//                 SizedBox(height: 15),
-//                  TextFormField(
-//                   decoration: InputDecoration(
-//                     labelText: 'DOB',
-//                     border: OutlineInputBorder()
-//                   ),
-//                 ),
-//                 SizedBox(height: 15),
-//                  TextFormField(
-//                   decoration: InputDecoration(
-//                     labelText: 'E-mail',
-//                     border: OutlineInputBorder()
-//                   ),
-//                 ),
-//                 SizedBox(height: 15),
-//                  TextFormField(
-//                   decoration: InputDecoration(
-//                     labelText: 'Phone_No',
-//                     border: OutlineInputBorder()
-//                   ),
-//                 ),
-//                 SizedBox(height: 15),
-//                  TextFormField(maxLines: 3,
-//                   decoration: InputDecoration(
-//                     labelText: 'Address',
-//                     border: OutlineInputBorder()
-//                   ),
-//                 ),
-//                 SizedBox(height: 15),
-//                  TextFormField(
-//                   decoration: InputDecoration(
-//                     labelText: 'City',
-//                     border: OutlineInputBorder()
-//                   ),
-//                 ),
-//                 SizedBox(height: 15),
-//                  TextFormField(
-//                   decoration: InputDecoration(
-//                     labelText: 'State',
-//                     border: OutlineInputBorder()
-//                   ),
-//                 ),
-//                 SizedBox(height: 15),
-//                  TextFormField(
-//                   decoration: InputDecoration(
-//                     labelText: 'Pin_code',
-//                     border: OutlineInputBorder()
-//                   ),
-//                 ),
-//                 SizedBox(height: 15),
-//                    Row(mainAxisAlignment: MainAxisAlignment.center,
-//                      children: [
-//                        ElevatedButton(
-//                                          style: ElevatedButton.styleFrom(
-//                         backgroundColor: const Color.fromARGB(217, 0, 0, 0),
-//                         foregroundColor: Colors.white,
-//                         shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(12)),
-//                         minimumSize: Size(100, 40)
-//                                          ),
-//                                          onPressed: () {
-//                                           Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage(),));
-//                                          },
-//                                          child: Text('Save',style: TextStyle(fontSize: 18),),
-//                                        ),
-//                           SizedBox(width: 18),             
-                     
-//                      ],
-//                    ),
-              
-//               ],
-            
-//             ),
-//           ),
-//         ),),
-      
-//     );
-//   }
-// }
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
+import 'package:healthcare/api/loginApi.dart';  // contains dio, baseurl, loginid
 
 class EditProfilePage extends StatefulWidget {
-  const EditProfilePage({super.key});
+  final Map<String, dynamic> profileData;
+
+  const EditProfilePage({super.key, required this.profileData});
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -121,16 +12,27 @@ class EditProfilePage extends StatefulWidget {
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final _formKey = GlobalKey<FormState>();
+  bool _isSaving = false;
 
-  // Editable profile data
-  final Map<String, TextEditingController> _controllers = {
-    'Full Name': TextEditingController(text: 'Coding with T'),
-    'Email': TextEditingController(text: 'support@codingwitht.com'),
-    'Phone Number': TextEditingController(text: '+92 317 8059528'),
-    'Date of Birth': TextEditingController(text: '01 January 2000'),
-    'Gender': TextEditingController(text: 'Male'),
-    'Address': TextEditingController(text: '123 Flutter St, Code City, Developer Land'),
-  };
+  late Map<String, TextEditingController> _controllers;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Initialize controllers with API response values
+    _controllers = {
+      'UserName': TextEditingController(text: widget.profileData['UserName'] ?? ''),
+      'E_mail': TextEditingController(text: widget.profileData['E_mail'] ?? ''),
+      'Phone': TextEditingController(text: widget.profileData['Phone'].toString() ?? ''),
+      'DOB': TextEditingController(text: widget.profileData['DOB'] ?? ''),
+      'Gender': TextEditingController(text: widget.profileData['Gender'] ?? ''),
+      'Address': TextEditingController(text: widget.profileData['Address'] ?? ''),
+      'City': TextEditingController(text: widget.profileData['City'] ?? ''),
+      'State': TextEditingController(text: widget.profileData['State'] ?? ''),
+      'Pincode': TextEditingController(text: widget.profileData['Pincode'].toString() ?? ''),
+    };
+  }
 
   @override
   void dispose() {
@@ -140,69 +42,128 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
-  void _saveProfile() {
-    if (_formKey.currentState!.validate()) {
-      // Here you'd usually send data to your backend or local storage
+  Future<void> _updateProfile() async {
+  if (!_formKey.currentState!.validate()) return;
+
+  setState(() => _isSaving = true);
+
+  final data = {
+    "UserName": _controllers['UserName']!.text,
+    "E_mail": _controllers['E_mail']!.text,
+    "Phone": int.tryParse(_controllers['Phone']!.text) ?? 0,
+    "DOB": _controllers['DOB']!.text,
+    "Gender": _controllers['Gender']!.text,
+    "Address": _controllers['Address']!.text,
+    "City": _controllers['City']!.text,
+    "State": _controllers['State']!.text,
+    "Pincode": int.tryParse(_controllers['Pincode']!.text) ?? 0,
+  };
+
+  try {
+    final response = await dio.put("$baseurl/ProfileView/$loginid", data: data);
+
+    print("Update API Response: ${response.data}");
+
+    // Treat any 2xx response as success
+    if (response.statusCode! >= 200 && response.statusCode! < 300) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Profile updated successfully')),
+        SnackBar(
+          content: const Text("Profile updated successfully"),
+          backgroundColor: Colors.green.shade600,
+        ),
       );
+      Navigator.pop(context, true); // return success
+    } else {
+      throw Exception("Update failed: ${response.data}");
     }
+  } catch (e) {
+    print("Error updating profile: $e");
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text("Profile update failed"),
+        backgroundColor: Colors.red.shade600,
+      ),
+    );
+  } finally {
+    setState(() => _isSaving = false);
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Edit Profile'),
-        centerTitle: true,
         backgroundColor: Colors.blueAccent,
+        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Card(
-            elevation: 4,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // Generate text fields for each entry
-                  ..._controllers.entries.map((entry) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: TextFormField(
-                        controller: entry.value,
-                        decoration: InputDecoration(
-                          labelText: entry.key,
-                          prefixIcon: Icon(_getIconForTitle(entry.key)),
-                          border: const OutlineInputBorder(),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return '${entry.key} is required';
-                          }
-                          return null;
-                        },
-                      ),
-                    );
-                  }).toList(),
 
-                  const SizedBox(height: 10),
+      body: Stack(
+        children: [
+          _buildForm(),
 
-                  // Save button
-                  ElevatedButton.icon(
-                    onPressed: _saveProfile,
-                    icon: const Icon(Icons.save),
-                    label: const Text('Save'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blueAccent,
-                      minimumSize: const Size.fromHeight(48),
-                    ),
-                  ),
-                ],
+          if (_isSaving)
+            Container(
+              color: Colors.black54,
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.white),
               ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildForm() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Form(
+        key: _formKey,
+        child: Card(
+          elevation: 4,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                ..._controllers.entries.map((entry) {
+                  String key = entry.key;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: TextFormField(
+                      controller: entry.value,
+                      readOnly: key == 'E_mail', // email is readonly
+                      decoration: InputDecoration(
+                        labelText: key,
+                        prefixIcon: Icon(_getIconForField(key)),
+                        border: const OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return '$key is required';
+                        }
+                        return null;
+                      },
+                    ),
+                  );
+                }).toList(),
+
+                const SizedBox(height: 10),
+
+                ElevatedButton.icon(
+                  onPressed: _updateProfile,
+                  icon: const Icon(Icons.save),
+                  label: const Text('Save'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blueAccent,
+                    minimumSize: const Size.fromHeight(48),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -210,19 +171,25 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  IconData _getIconForTitle(String title) {
-    switch (title) {
-      case 'Email':
+  IconData _getIconForField(String key) {
+    switch (key) {
+      case 'E_mail':
         return Icons.email;
-      case 'Phone Number':
+      case 'Phone':
         return Icons.phone;
-      case 'Date of Birth':
+      case 'DOB':
         return Icons.cake;
       case 'Gender':
         return Icons.wc;
       case 'Address':
         return Icons.home;
-      case 'Full Name':
+      case 'City':
+        return Icons.location_city;
+      case 'State':
+        return Icons.map;
+      case 'Pincode':
+        return Icons.pin;
+      case 'UserName':
       default:
         return Icons.person;
     }
