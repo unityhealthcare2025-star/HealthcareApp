@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:healthcare/api/loginApi.dart';  // contains dio, baseurl, loginid
+import 'package:healthcare/api/loginApi.dart';
+import 'package:healthcare/api/viewProfileapi.dart';  // contains dio, baseurl, loginid
 
 class EditProfilePage extends StatefulWidget {
   final Map<String, dynamic> profileData;
@@ -155,7 +156,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 const SizedBox(height: 10),
 
                 ElevatedButton.icon(
-                  onPressed: _updateProfile,
+                  onPressed:(){
+                    _updateProfile();
+                    
+                  } ,
                   icon: const Icon(Icons.save),
                   label: const Text('Save'),
                   style: ElevatedButton.styleFrom(

@@ -21,7 +21,7 @@ Future<void> loginApi(username,password,context)async{
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Invalid credentials"), duration: Duration(seconds: 3),));
     }
   } catch (e) {
-    
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Invalid credentials"), duration: Duration(seconds: 3),));
     
   }
 }

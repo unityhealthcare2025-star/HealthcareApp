@@ -99,15 +99,19 @@ class ProfileScreenState extends State<ProfileScreen> {
                 trailing: Icon(Icons.arrow_right_outlined),
                 leading: const Icon(Icons.person),
                 title: const Text('Edit Profile'),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => EditProfilePage(profileData:ViewProfile)),
-                  );
-                  // TODO: Navigate to View Profile Screen
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text("View Profile tapped")),
-                  );
+                onTap: () async{
+                  final updated = await Navigator.push(
+  context,
+  MaterialPageRoute(
+    builder: (_) => EditProfilePage(profileData: ViewProfile),
+  ),
+);
+
+// If updated == true, call fetchProfile again
+if (updated == true) {
+  fetchProfile();   // <<< RELOAD UPDATED DATA
+}
+                
                 },
               ),
 

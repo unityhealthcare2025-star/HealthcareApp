@@ -3,40 +3,69 @@ import 'package:healthcare/DoctorfeedbackRating.dart';
 import 'package:healthcare/MyBooking.dart';
 import 'package:healthcare/SendComplaint.dart';
 import 'package:healthcare/ViewHospitals.dart';
+import 'package:healthcare/api/viewProfileapi.dart';
 import 'package:healthcare/bookslot.dart';
 import 'package:healthcare/viewDoctors.dart';
 
-class Homepage extends StatelessWidget {
-  const Homepage({super.key});
+class Homepage extends StatefulWidget {
+  Homepage({super.key});
 
+  @override
+  State<Homepage> createState() => _HomepageState();
+}
+
+class _HomepageState extends State<Homepage> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    //  fetchProfile();
+    
+  }
+
+//   Map<String,dynamic> ViewProfile = {};
+//    bool _isLoading = true;
+//    Future<void> fetchProfile() async {
+//   setState(() {
+//     _isLoading = true;
+//   });
+
+//   final data = await fetchprofile(); // call API
+//   setState(() {
+//     ViewProfile = data; // update state
+//     _isLoading = false;
+//   });
+// }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            UserAccountsDrawerHeader(
-              currentAccountPicture: ClipRRect(
-                borderRadius: BorderRadiusGeometry.circular(50),
-                child: Image.network('https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png')),
-              accountName: Text('aaa'),
-               accountEmail: Text('aaa@gmail.com')),
+      // drawer: Drawer(
+      //   child: ListView(
+      //     children: [
+      //       UserAccountsDrawerHeader(
+      //         currentAccountPicture: ClipRRect(
+      //           borderRadius: BorderRadiusGeometry.circular(50),
+      //           child: Image.network('https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png')),
+      //         accountName: Text(ViewProfile['UserName']),
+      //          accountEmail: Text(ViewProfile['E_mail'])),
 
-              ListTile(
-                tileColor: const Color.fromARGB(255, 239, 241, 243),
-                title: Text('send Complaints'),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SendComplaint(),)),
-              ),
-              ListTile(
-                tileColor: const Color.fromARGB(255, 239, 241, 243),
-                title: Text('Send Feedback and Rating'),
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DoctorFeedbackRating(),)),
-              )
-          ],
-        ),
-      ),
+      //         ListTile(
+      //           tileColor: const Color.fromARGB(255, 239, 241, 243),
+      //           title: Text('send Complaints'),
+      //           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => SendComplaint(),)),
+      //         ),
+      //         ListTile(
+      //           tileColor: const Color.fromARGB(255, 239, 241, 243),
+      //           title: Text('Send Feedback and Rating'),
+      //           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => DoctorFeedbackRating(),)),
+      //         )
+      //     ],
+      //   ),
+      // ),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
           'HealthCare Assistant',
           style: TextStyle(color: Colors.white),
@@ -95,18 +124,18 @@ class Homepage extends StatelessWidget {
                   // );
                   //   },
                   // ),
-                  // _buildGridCard(
-                  //   context,
-                  //   icon: Icons.note, 
-                  //   title: 'Booking Details',
-                  //    onTap: () {
-                  //     // Navigate to Feedback
-                  //     Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => BookSlot()),
-                  // );
-                  //   },
-                  //   ),
+                  _buildGridCard(
+                    context,
+                    icon: Icons.chat,
+                    title: 'Send Complaint',
+                     onTap: () {
+                      // Navigate to Feedback
+                      Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => SendComplaint()),
+                  );
+                    },
+                    ),
                   _buildGridCard(
                     context,
                     icon: Icons.event_note, 

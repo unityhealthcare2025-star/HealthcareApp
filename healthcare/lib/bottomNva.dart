@@ -6,7 +6,7 @@ import 'package:healthcare/homePage.dart';
 import 'package:motion_tab_bar_v2/motion-tab-controller.dart';
 
 class Bottomnav extends StatefulWidget {
-  const Bottomnav({super.key});
+   Bottomnav({super.key});
 
   @override
   State<Bottomnav> createState() => _BottomnavState();
@@ -33,6 +33,8 @@ class _BottomnavState extends State<Bottomnav> with TickerProviderStateMixin {
       length: _screens.length,
       vsync: this,
     );
+
+    
   }
 
   @override
