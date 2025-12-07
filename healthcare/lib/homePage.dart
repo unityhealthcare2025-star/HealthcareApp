@@ -3,6 +3,7 @@ import 'package:healthcare/DoctorfeedbackRating.dart';
 import 'package:healthcare/MyBooking.dart';
 import 'package:healthcare/SendComplaint.dart';
 import 'package:healthcare/ViewHospitals.dart';
+import 'package:healthcare/api/symptomprediction.dart';
 import 'package:healthcare/api/viewProfileapi.dart';
 import 'package:healthcare/bookslot.dart';
 import 'package:healthcare/viewDoctors.dart';
@@ -96,7 +97,7 @@ class _HomepageState extends State<Homepage> {
                     icon: Icons.health_and_safety,
                     title: 'Symptom\nPrediction',
                     onTap: () {
-                      // Navigate to Symptom Prediction
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => SymptomPrediction(),));
                     },
                   ),
                   _buildGridCard(

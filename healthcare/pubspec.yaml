@@ -39,6 +39,7 @@ dependencies:
   dio: ^5.9.0
   location: ^8.0.1
   flutter_rating_bar: ^4.0.1
+  google_generative_ai: ^0.4.7
 
 dev_dependencies:
   flutter_test:
