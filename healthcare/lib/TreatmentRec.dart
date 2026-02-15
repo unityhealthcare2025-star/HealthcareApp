@@ -17,7 +17,7 @@ class _TreatmentRecommendationPageState
   String? _treatmentPlan;
   bool _isLoading = true;
 
-  final String _apiKey = "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"; // Replace with your key
+  final String _apiKey = "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"; // Replace with your key
 
   @override
   void initState() {
@@ -52,6 +52,8 @@ Keep it simple and easy to read.
         },
         body: jsonEncode({
           "model": "openai/gpt-4.1-mini",
+          "max_tokens":800,
+          "temperature":0.7,
           "messages": [
             {"role": "system", "content": "You are a helpful medical assistant."},
             {"role": "user", "content": prompt}

@@ -10,6 +10,7 @@ import 'package:healthcare/bookslot.dart';
 import 'package:healthcare/bottomNva.dart';
 import 'package:healthcare/MyProfile.dart';
 import 'package:healthcare/homePage.dart';
+import 'package:healthcare/ipscreen.dart';
 import 'package:healthcare/login.dart';
 import 'package:healthcare/register.dart';
 import 'package:healthcare/viewDoctors.dart';
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
        
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home:  LoginPage(),
+      home:  IPScreen(),
     );
   }
 }

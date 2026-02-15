@@ -7,6 +7,7 @@ import 'package:healthcare/api/symptomprediction.dart';
 import 'package:healthcare/api/viewProfileapi.dart';
 import 'package:healthcare/bookslot.dart';
 import 'package:healthcare/viewDoctors.dart';
+import 'package:healthcare/viewallhospitals.dart';
 
 class Homepage extends StatefulWidget {
   Homepage({super.key});
@@ -110,6 +111,19 @@ class _HomepageState extends State<Homepage> {
                      Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => NearbyHospitalsPage()),
+                  );
+                    },
+                  ),
+                  _buildGridCard(
+                    context,
+                    icon: Icons.local_hospital,
+                    title: 'View All\nHospitals',
+                    onTap: () {
+
+                     // Navigate to Hospitals
+                     Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AllHospitalsPage()),
                   );
                     },
                   ),
